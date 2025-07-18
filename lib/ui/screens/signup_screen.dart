@@ -1,8 +1,13 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
+import 'package:tasks_manager/data/service/network_caller.dart';
+import 'package:tasks_manager/ui/screens/signin_screen.dart';
+import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
+import '../../data/urls.dart';
 import '../widgets/screen_background.dart';
+
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -19,6 +24,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _lastNameController=TextEditingController();
   final TextEditingController _mobileController=TextEditingController();
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
+  bool _signupInProgress = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,10 +123,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: ElevatedButton(
+                      child: Visibility(
+                        visible: _signupInProgress == false,
+                        replacement: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        child: ElevatedButton(
 
-                          onPressed: _onTapSignUpButton,
-                          child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                            onPressed: _onTapSignUpButton,
+                            child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                        ),
                       ),
                     ),
                     SizedBox(height: 100,),
@@ -156,9 +168,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _onTapSignUpButton(){
     if(_formKey.currentState!.validate()){
-      //TODO signup with API
+      _signUp();
     }
 
+  }
+
+  Future<void> _signUp() async{
+    _signupInProgress = true;
+    setState(() {});
+    Map<String,String> requestBody= {
+      "email": _emailController.text.trim(),
+      "firstName": _firstNameController.text.trim(),
+      "lastName": _lastNameController.text.trim(),
+      "mobile": _mobileController.text.trim(),
+      "password": _passwordController.text,
+    };
+    NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.registrationUrl,
+        body: requestBody,
+    );
+    _signupInProgress = false;
+    setState(() {});
+
+    if(response.isSuccess){
+      _clearTextFields();
+      Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
+      showSnackBarMassage(context, "Registration Success.Please Login");
+
+    }else{
+      showSnackBarMassage(context, response.errorMassage!);
+
+    }
+
+  }
+
+  void _clearTextFields(){
+    _emailController.clear();
+    _firstNameController.clear();
+    _lastNameController.clear();
+    _mobileController.clear();
+    _passwordController.clear();
   }
 
   void _onTapSignInButton(){

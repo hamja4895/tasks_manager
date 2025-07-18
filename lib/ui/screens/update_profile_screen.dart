@@ -2,8 +2,9 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tasks_manager/ui/widgets/tm_appbar.dart';
-
 import '../widgets/screen_background.dart';
+
+
 class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});
 
@@ -44,7 +45,9 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                       ),
                     ),
                     SizedBox(height: 24,),
+
                     _dealPhotoPicker(),
+
                     SizedBox(height: 24,),
                     TextFormField(
                       controller: _emailController,
