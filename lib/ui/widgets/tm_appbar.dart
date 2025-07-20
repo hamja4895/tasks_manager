@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
+import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
 
 import '../../app.dart';
+import '../controllers/auth_controller.dart';
 import '../screens/update_profile_screen.dart';
 class TM_AppBar extends StatefulWidget implements PreferredSizeWidget {
   const TM_AppBar({super.key});
@@ -32,7 +34,7 @@ class _TM_AppBarState extends State<TM_AppBar> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Amir Hamja",
+                    "${AuthController.userModel!.firstName} ${AuthController.userModel!.lastName}",
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
@@ -40,7 +42,7 @@ class _TM_AppBarState extends State<TM_AppBar> {
                     ),
                   ),
                   Text(
-                    "amir@gmail.com",
+                    AuthController.userModel!.email,
                     style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
                 ],
@@ -61,8 +63,10 @@ class _TM_AppBarState extends State<TM_AppBar> {
     );
   }
 
-  void _onTapLogoutButton(){
+  Future<void> _onTapLogoutButton() async{
+    await AuthController.clearUserData();
     Navigator.pushNamedAndRemoveUntil(context,SignInScreen.name , (predicate)=>false);
+    showSnackBarMassage(context,"Logout Success");
 
   }
   void _onTapProfile(){

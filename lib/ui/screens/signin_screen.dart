@@ -6,6 +6,8 @@ import 'package:tasks_manager/data/urls.dart';
 import 'package:tasks_manager/ui/screens/signup_screen.dart';
 import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
 
+import '../../data/models/user_model.dart';
+import '../controllers/auth_controller.dart';
 import '../widgets/screen_background.dart';
 import '../widgets/snack_bar_massage.dart';
 import 'forgot_password_email_screen.dart';
@@ -149,6 +151,10 @@ class _SignInScreenState extends State<SignInScreen> {
         body: requestBody,
     );
     if(response.isSuccess){
+      UserModel userModel = UserModel.fromJson(response.body!["data"]);
+      String token = response.body!["token"];
+      await AuthController.saveUserData(userModel, token);
+
       Navigator.pushNamedAndRemoveUntil(context, MainNavbarHolder.name, (predicate)=>false);
       showSnackBarMassage(context,"Login Success");
 
