@@ -1,9 +1,13 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:tasks_manager/data/service/network_caller.dart';
+import 'package:tasks_manager/data/urls.dart';
 import 'package:tasks_manager/ui/screens/signup_screen.dart';
+import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
 
 import '../widgets/screen_background.dart';
+import '../widgets/snack_bar_massage.dart';
 import 'forgot_password_email_screen.dart';
 import 'main_navbar_holder.dart';
 class SignInScreen extends StatefulWidget {
@@ -19,6 +23,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController=TextEditingController();
   final TextEditingController _passwordController=TextEditingController();
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
+  bool _signinProgress=false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,10 +79,14 @@ class _SignInScreenState extends State<SignInScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: ElevatedButton(
+                      child: Visibility(
+                        visible: _signinProgress == false,
+                        replacement: CenteredCircularIndicator(),
+                        child: ElevatedButton(
 
-                          onPressed: _onTapSignInButton,
-                          child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                            onPressed: _onTapSignInButton,
+                            child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                        ),
                       ),
                     ),
                   SizedBox(height: 100,),
@@ -122,11 +131,36 @@ class _SignInScreenState extends State<SignInScreen> {
   }
   void _onTapSignInButton(){
     if(_formKey.currentState!.validate()){
-      //TODO signin with API
+      _signIn();
     }
-    Navigator.pushNamedAndRemoveUntil(context, MainNavbarHolder.name, (predicate)=>false);
 
   }
+
+  Future<void> _signIn() async{
+    _signinProgress = true;
+    setState(() {});
+    Map<String,String> requestBody={
+      "email": _emailController.text.trim(),
+      "password": _passwordController.text,
+
+    };
+    NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.loginUrl,
+        body: requestBody,
+    );
+    if(response.isSuccess){
+      Navigator.pushNamedAndRemoveUntil(context, MainNavbarHolder.name, (predicate)=>false);
+      showSnackBarMassage(context,"Login Success");
+
+    }else{
+      _signinProgress = false;
+      setState(() {});
+      showSnackBarMassage(context, response.errorMassage!);
+
+    }
+
+  }
+
   void _onTapForgotPasswordButton(){
     Navigator.pushNamed(context, ForgotPasswordEmailScreen.name);
 

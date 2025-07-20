@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/data/service/network_caller.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
+import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
 import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
 import '../../data/urls.dart';
 import '../widgets/screen_background.dart';
@@ -125,9 +126,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       height: 40,
                       child: Visibility(
                         visible: _signupInProgress == false,
-                        replacement: Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        replacement: CenteredCircularIndicator(),
                         child: ElevatedButton(
 
                             onPressed: _onTapSignUpButton,

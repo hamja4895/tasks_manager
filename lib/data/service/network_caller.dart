@@ -54,7 +54,7 @@ class NetworkCaller{
       );
     }
   }
-  static Future<NetworkResponse> postRequest({required String url,required Map<String,String>? body}) async{
+  static Future<NetworkResponse> postRequest({required String url, Map<String,String>? body}) async{
     try{
       Uri uri = Uri.parse(url);
       _logRequest(url, body);
