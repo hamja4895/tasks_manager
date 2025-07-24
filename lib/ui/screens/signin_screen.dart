@@ -149,18 +149,18 @@ class _SignInScreenState extends State<SignInScreen> {
     NetworkResponse response = await NetworkCaller.postRequest(
         url: Urls.loginUrl,
         body: requestBody,
+        isFromLogin: true,
     );
+    _signinProgress = false;
+    setState(() {});
     if(response.isSuccess){
       UserModel userModel = UserModel.fromJson(response.body!["data"]);
       String token = response.body!["token"];
       await AuthController.saveUserData(userModel, token);
-
       Navigator.pushNamedAndRemoveUntil(context, MainNavbarHolder.name, (predicate)=>false);
       showSnackBarMassage(context,"Login Success");
 
     }else{
-      _signinProgress = false;
-      setState(() {});
       showSnackBarMassage(context, response.errorMassage!);
 
     }

@@ -1,10 +1,9 @@
-
-
-
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
+import '../../app.dart';
+import '../../ui/controllers/auth_controller.dart';
+import 'package:tasks_manager/ui/screens/signin_screen.dart';
 
 
 class NetworkResponse{
@@ -23,7 +22,8 @@ class NetworkResponse{
 
 class NetworkCaller{
 
-  static const defaultErrorMassage="Something went wrong";
+  static const _defaultErrorMassage="Something went wrong";
+  static const String _unAuthorizedErrorMassage="UnAuthorized token";
 
   static Future<NetworkResponse> getRequest({required String url}) async{
     try{
@@ -38,12 +38,21 @@ class NetworkCaller{
           statusCode: response.statusCode,
           body: decodedJson,
         );
-      } else {
+      }
+      else if(response.statusCode == 401){
+        _onUnAuthorize();
+        return NetworkResponse(
+          isSuccess: false,
+          statusCode: response.statusCode,
+          errorMassage: _unAuthorizedErrorMassage,
+        );
+      }
+      else {
         final decodedJson = jsonDecode(response.body);
         return NetworkResponse(
           isSuccess: false,
           statusCode: response.statusCode,
-          errorMassage: decodedJson["data"] ?? defaultErrorMassage,
+          errorMassage: decodedJson["data"] ?? _defaultErrorMassage,
         );
       }
     }catch(e){
@@ -54,7 +63,7 @@ class NetworkCaller{
       );
     }
   }
-  static Future<NetworkResponse> postRequest({required String url, Map<String,String>? body}) async{
+  static Future<NetworkResponse> postRequest({required String url, Map<String,String>? body,bool isFromLogin=false}) async{
     try{
       Uri uri = Uri.parse(url);
       _logRequest(url, body);
@@ -62,22 +71,33 @@ class NetworkCaller{
           uri,
           headers: {
             "Content-Type": "application/json",
+            "token": AuthController.accesToken ??"",
           },
           body: jsonEncode(body));
       _logResponse(url, response);
       if (response.statusCode == 200) {
-        final decodedJson = json.decode(response.body);
+        final decodedJson = jsonDecode(response.body);
         return NetworkResponse(
           isSuccess: true,
           statusCode: response.statusCode,
           body: decodedJson,
         );
-      } else {
-        final decodedJson = json.decode(response.body);
+      }
+      else if(response.statusCode == 401){
+        if(isFromLogin){
+          _onUnAuthorize();
+        }
         return NetworkResponse(
           isSuccess: false,
           statusCode: response.statusCode,
-          errorMassage: decodedJson["data"] ?? defaultErrorMassage,
+        );
+      }
+      else {
+        final decodedJson = jsonDecode(response.body);
+        return NetworkResponse(
+          isSuccess: false,
+          statusCode: response.statusCode,
+          errorMassage: decodedJson["data"] ?? _defaultErrorMassage,
         );
       }
     }catch(e){
@@ -106,6 +126,12 @@ class NetworkCaller{
             "body:${response.body}\n"
             "=================================="
     );
+
+  }
+  static Future<void> _onUnAuthorize() async{
+    await AuthController.clearUserData();
+    Navigator.pushNamedAndRemoveUntil(
+        TaskManagerApp.navigator.currentContext!, SignInScreen.name, (predicate) => false);
 
   }
 }
