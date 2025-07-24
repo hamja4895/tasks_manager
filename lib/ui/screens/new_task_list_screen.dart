@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-
+import 'package:tasks_manager/data/service/network_caller.dart';
+import '../../data/models/task_model.dart';
+import '../../data/urls.dart';
+import '../widgets/centered_cicular_indicator.dart';
 import '../widgets/screen_background.dart';
+import '../widgets/snack_bar_massage.dart';
 import '../widgets/taskCountSummeryCard.dart';
 import '../widgets/taskSummeryCard.dart';
 import 'add_new_task_screen.dart';
+
+
 class NewTaskListScreen extends StatefulWidget {
   const NewTaskListScreen({super.key});
 
@@ -12,6 +18,16 @@ class NewTaskListScreen extends StatefulWidget {
 }
 
 class _NewTaskListScreenState extends State<NewTaskListScreen> {
+  bool _getNewTaskListInProgress=false;
+  List<TaskModel> _newTaskList=[];
+
+  @override
+  void initState() {
+    super.initState();
+    _getNewTaskList();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,6 +49,7 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
                 ),
 
               ),
+
               // Row(
               //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
               //   children: [
@@ -50,11 +67,18 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
               Divider(thickness: 2,),
               SizedBox(height: 5),
               Expanded(
-                child: ListView.builder(
-                  itemCount: 100,
-                    itemBuilder: (context,index){
-                    return TaskSummeryCard(taskType: TaskType.Newtask,);
-                    }
+                child: Visibility(
+                  visible: _getNewTaskListInProgress == false,
+                  replacement: CenteredCircularIndicator(),
+                  child: ListView.builder(
+                    itemCount: _newTaskList.length,
+                      itemBuilder: (context,index){
+                      return TaskSummeryCard(
+                        taskType: TaskType.Newtask,
+                        taskModel: _newTaskList[index],
+                      );
+                      }
+                  ),
                 ),
               )
             ],
@@ -72,6 +96,27 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
       ),
 
     );
+  }
+  Future<void> _getNewTaskList()async{
+    _getNewTaskListInProgress=true;
+    setState(() {});
+    NetworkResponse response = await NetworkCaller.getRequest(
+        url: Urls.getNewTaskListUrl
+    );
+
+    if(response.isSuccess){
+      List<TaskModel> list=[];
+      for(Map<String,dynamic> jsonData in response.body!["data"]){
+        list.add(TaskModel.fromJson(jsonData));
+      }
+      _newTaskList=list;
+
+    }else{
+      showSnackBarMassage(context, response.errorMassage!);
+
+    }
+    _getNewTaskListInProgress=false;
+    setState(() {});
   }
 
   void _onTapAddButton(){

@@ -4,4 +4,9 @@ class Urls{
   static const String registrationUrl="$_baseUrl/Registration";
   static const String loginUrl="$_baseUrl/Login";
   static const String createNewTaskUrl="$_baseUrl/createTask";
+  static const String getNewTaskListUrl="$_baseUrl/listTaskByStatus/New";
+  static const String getCompletedTaskListUrl="$_baseUrl/listTaskByStatus/Completed";
+  static const String getCancelledTaskListUrl="$_baseUrl/listTaskByStatus/Cancelled";
+  static const String getProgressTaskListUrl="$_baseUrl/listTaskByStatus/Progress";
+
 }

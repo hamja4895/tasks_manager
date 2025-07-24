@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tasks_manager/data/models/task_model.dart';
 
 enum TaskType{
   Newtask,
@@ -9,9 +10,10 @@ enum TaskType{
 }
 class TaskSummeryCard extends StatelessWidget {
   final TaskType taskType;
+  final TaskModel  taskModel;
 
   const TaskSummeryCard({
-    super.key, required this.taskType,
+    super.key, required this.taskType, required this.taskModel,
   });
 
   @override
@@ -27,10 +29,10 @@ class TaskSummeryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Tittle will be here",style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 23),),
-            Text("Description will be here",style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
+            Text(taskModel.title,style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 23),),
+            Text(taskModel.description,style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
             SizedBox(height: 10,),
-            Text("Date: 12/12/2023",style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
+            Text("Date: ${taskModel.createdDate}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
             SizedBox(height: 10,),
             Row(
               children: [
