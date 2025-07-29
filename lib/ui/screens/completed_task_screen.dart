@@ -21,7 +21,9 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
   @override
   void initState() {
     super.initState();
-    _getCompletedTaskList();
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      _getCompletedTaskList();
+    });
   }
 
   @override
@@ -67,10 +69,14 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
       _completedTaskList=list;
 
     }else{
-      showSnackBarMassage(context, response.errorMassage!);
+      if(mounted){
+        showSnackBarMassage(context, response.errorMassage!);
+      }
     }
     _getCompletedTaskListInProgress=false;
-    setState(() {});
+    if(mounted){
+      setState(() {});
+    }
   }
 }
 

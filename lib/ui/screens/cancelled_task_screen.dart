@@ -21,7 +21,9 @@ class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
   @override
   void initState() {
     super.initState();
-    _getCancelledTaskList();
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      _getCancelledTaskList();
+    });
   }
 
   @override
@@ -67,11 +69,15 @@ class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
       }
       _cancelledTaskList=list;
     }else{
-      showSnackBarMassage(context, response.errorMassage!);
+      if(mounted){
+        showSnackBarMassage(context, response.errorMassage!);
+      }
 
     }
     _getCancelledTaskListInProgress=false;
-    setState(() {});
+    if(mounted){
+      setState(() {});
+    }
   }
 }
 
