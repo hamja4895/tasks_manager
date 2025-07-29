@@ -10,5 +10,7 @@ class Urls{
   static const String getProgressTaskListUrl="$_baseUrl/listTaskByStatus/Progress";
   static const String getTaskStatusCountListUrl="$_baseUrl/taskStatusCount";
   static String editTaskStatusUrl(String taskId,String statusId)=>"$_baseUrl/updateTaskStatus/$taskId/$statusId";
+  static const String updateProfileUrl="$_baseUrl/ProfileUpdate";
+
 
 }

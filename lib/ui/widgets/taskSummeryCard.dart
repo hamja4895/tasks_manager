@@ -28,6 +28,7 @@ class TaskSummeryCard extends StatefulWidget {
 
 class _TaskSummeryCardState extends State<TaskSummeryCard> {
   bool _getEditTaskStatusInProgress=false;
+  bool _deleteTaskInProgress=false;
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +76,15 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
                       icon: Icon(Icons.edit,color: Colors.green,)
                   ),
                 ),
-                IconButton(
-                    onPressed: (){},
-                    icon: Icon(Icons.delete,color: Colors.red,)
+                Visibility(
+                  visible: _deleteTaskInProgress == false,
+                  replacement: CenteredCircularIndicator(),
+                  child: IconButton(
+                      onPressed: (){
+                        _showDeleteDialog();
+                      },
+                      icon: Icon(Icons.delete,color: Colors.red,)
+                  ),
                 ),
 
               ],
@@ -173,10 +180,42 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
       );
     });
   }
+  void _showDeleteDialog(){
+    showDialog(context: context, builder: (cxt){
+      return AlertDialog(
+        title: Text("Delete Task",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: Text("Are you sure you want to delete this task?",
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.red),
+        ),
+        actions: [
+          TextButton(
+          onPressed: (){
+            Navigator.pop(context);
+          }, child: Text("Cancel",
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.blue,fontSize: 25),
+          ),
+          ),
+
+          TextButton(
+          onPressed: (){
+
+          },
+              child: Text("Delete",
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.red,fontSize: 25),
+              ),
+          )
+        ]
+      );
+    });
+
+  }
   Widget ? _getTaskStatusTrailing(TaskType type){
     return  widget.taskType == type ? Icon(Icons.check,color: Colors.green,) : null;
 
   }
+
   Future<void> _editTaskStatusTo(String status) async{
     Navigator.pop(context);
     _getEditTaskStatusInProgress=true;
@@ -204,5 +243,14 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
     }
 
   }
+  Future<void> _deleteTask() async{
+    Navigator.pop(context);
+    _deleteTaskInProgress=true;
+    if(mounted){
+      setState(() {});
+    }
+
+  }
+
 
 }

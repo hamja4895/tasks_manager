@@ -1,8 +1,15 @@
-import 'package:email_validator/email_validator.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tasks_manager/data/service/network_caller.dart';
+import 'package:tasks_manager/data/urls.dart';
 import 'package:tasks_manager/ui/widgets/tm_appbar.dart';
+import '../controllers/auth_controller.dart';
+import '../widgets/centered_cicular_indicator.dart';
 import '../widgets/screen_background.dart';
+import '../widgets/snack_bar_massage.dart';
 
 
 class UpdateProfileScreen extends StatefulWidget {
@@ -23,6 +30,19 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
   final ImagePicker _imagePicker=ImagePicker();
   XFile ? _selectedImage;
+  bool _updateProfileProgress=false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _emailController.text=AuthController.userModel!.email;
+    _firstNameController.text=AuthController.userModel!.firstName;
+    _lastNameController.text=AuthController.userModel!.lastName;
+    _mobileController.text=AuthController.userModel!.mobile;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,17 +72,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                     TextFormField(
                       controller: _emailController,
                       textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        hintText: "Email",
-                      ),
-                      validator: (String ? value){
-                        String email= value ?? "";
-                        if(EmailValidator.validate(email)==false){
-                          return "Please Enter a valid email";
+                      enabled: false,
 
-                        }
-                        return null;
-                      },
                     ),
                     SizedBox(height: 16,),
                     TextFormField(
@@ -115,9 +126,9 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         hintText: "Password",
                       ),
                       validator: (String ? value){
-                        if((value?.length ?? 0)<=6){
+                        int length = value?.length ?? 0;
+                        if(length >0 && length <=6){
                           return "Please Enter a valid password";
-
                         }
                         return null;
                       },
@@ -126,10 +137,14 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: ElevatedButton(
+                      child: Visibility(
+                        visible: _updateProfileProgress == false,
+                        replacement: CenteredCircularIndicator(),
 
-                          onPressed: _onTapUpdateProfileButton,
-                          child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                        child: ElevatedButton(
+                            onPressed: _onTapUpdateProfileButton,
+                            child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                        ),
                       ),
                     ),
 
@@ -194,7 +209,53 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   void _onTapUpdateProfileButton(){
     if(_formKey.currentState!.validate()){
-      //TODO Update Profile with API
+      _postUpdateDProfile();
+    }
+
+  }
+
+  Future<void> _postUpdateDProfile() async{
+    _updateProfileProgress = true;
+    if(mounted){
+      setState(() {});
+    }
+    Map<String,String> requestBody={
+      "email": _emailController.text.trim(),
+      "firstName": _firstNameController.text.trim(),
+      "lastName": _lastNameController.text.trim(),
+      "mobile": _mobileController.text.trim(),
+    };
+    if(_passwordController.text.isNotEmpty){
+      requestBody["password"] = _passwordController.text;
+    }
+    if(_selectedImage != null){
+      Uint8List imageBytes = (await _selectedImage!.readAsBytes()) as Uint8List;
+      requestBody["photo"] = base64Encode(imageBytes as List<int>);
+    }
+    NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.updateProfileUrl,
+        body: requestBody,
+    );
+    if(response.isSuccess){
+      _passwordController.clear();
+      AuthController.userModel!.email = _emailController.text.trim();
+      AuthController.userModel!.firstName = _firstNameController.text.trim();
+      AuthController.userModel!.lastName = _lastNameController.text.trim();
+      AuthController.userModel!.mobile = _mobileController.text.trim();
+      if(mounted){
+        showSnackBarMassage(context, "Profile Updated Successfully");
+      }
+
+    }
+    else{
+      if(mounted){
+        showSnackBarMassage(context, response.errorMassage!);
+      }
+    }
+
+    _updateProfileProgress = false;
+    if(mounted){
+      setState(() {});
     }
 
   }

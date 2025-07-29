@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
 import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
@@ -26,7 +28,7 @@ class _TM_AppBarState extends State<TM_AppBar> {
         child: Row(
           children: [
             CircleAvatar(radius: 24,
-              backgroundImage: NetworkImage("https://media.istockphoto.com/id/155415624/photo/for-the-man-who-has-it-all.jpg?s=612x612&w=0&k=20&c=adhW7qc6YpaGC-iHprngGonVOrnz7sdlYCj126-Mo5A="),
+              backgroundImage: MemoryImage((AuthController.userModel?.photo ?? "") as Uint8List),
             ),
             SizedBox(width: 20),
             Expanded(
