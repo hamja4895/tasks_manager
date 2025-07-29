@@ -4,7 +4,7 @@ class UserModel{
   late String firstName;
   late String lastName;
   late String mobile;
-  late String photo;
+  String ? photo;
 
 
   UserModel.fromJson(Map<String,dynamic> jsonData){

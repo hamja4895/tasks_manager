@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
 import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
 
-import '../../app.dart';
 import '../controllers/auth_controller.dart';
 import '../screens/update_profile_screen.dart';
 class TM_AppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -28,7 +27,7 @@ class _TM_AppBarState extends State<TM_AppBar> {
         child: Row(
           children: [
             CircleAvatar(radius: 24,
-              backgroundImage: MemoryImage((AuthController.userModel?.photo ?? "") as Uint8List),
+              backgroundImage:AuthController.userModel?.photo == null ? null : MemoryImage((AuthController.userModel?.photo ?? "") as Uint8List),
             ),
             SizedBox(width: 20),
             Expanded(
