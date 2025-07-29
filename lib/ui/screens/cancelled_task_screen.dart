@@ -44,6 +44,9 @@ class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
                         return TaskSummeryCard(
                           taskType: TaskType.Cancelled,
                           taskModel: _cancelledTaskList[index],
+                          onStatusChanged: () {
+                            _getCancelledTaskList();
+                          },
                         );
                       }
                   ),

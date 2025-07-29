@@ -47,6 +47,9 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
                         return TaskSummeryCard(
                           taskType: TaskType.Progress,
                           taskModel: _progressTaskList[index],
+                          onStatusChanged: () {
+                            _getProgressTaskList();
+                          },
                         );
                       }
                   ),

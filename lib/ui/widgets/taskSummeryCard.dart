@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/data/models/task_model.dart';
+import 'package:tasks_manager/data/service/network_caller.dart';
+import 'package:tasks_manager/data/urls.dart';
+import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
+
+import 'centered_cicular_indicator.dart';
 
 enum TaskType{
   Newtask,
@@ -8,13 +13,21 @@ enum TaskType{
   Progress,
 
 }
-class TaskSummeryCard extends StatelessWidget {
+class TaskSummeryCard extends StatefulWidget {
   final TaskType taskType;
   final TaskModel  taskModel;
+  final VoidCallback onStatusChanged;
 
   const TaskSummeryCard({
-    super.key, required this.taskType, required this.taskModel,
+    super.key, required this.taskType, required this.taskModel, required this.onStatusChanged,
   });
+
+  @override
+  State<TaskSummeryCard> createState() => _TaskSummeryCardState();
+}
+
+class _TaskSummeryCardState extends State<TaskSummeryCard> {
+  bool _getEditTaskStatusInProgress=false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +42,10 @@ class TaskSummeryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(taskModel.title,style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 23),),
-            Text(taskModel.description,style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
+            Text(widget.taskModel.title,style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 23),),
+            Text(widget.taskModel.description,style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
             SizedBox(height: 10,),
-            Text("Date: ${taskModel.createdDate}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
+            Text("Date: ${widget.taskModel.createdDate}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),),
             SizedBox(height: 10,),
             Row(
               children: [
@@ -52,9 +65,15 @@ class TaskSummeryCard extends StatelessWidget {
                   backgroundColor: _getChipColor(),
                 ),
                 Spacer(),
-                IconButton(
-                    onPressed: (){},
-                    icon: Icon(Icons.edit,color: Colors.green,)
+                Visibility(
+                  visible: _getEditTaskStatusInProgress == false,
+                  replacement: CenteredCircularIndicator(),
+                  child: IconButton(
+                      onPressed: (){
+                        _showEditTaskStatusDialog();
+                      },
+                      icon: Icon(Icons.edit,color: Colors.green,)
+                  ),
                 ),
                 IconButton(
                     onPressed: (){},
@@ -69,8 +88,9 @@ class TaskSummeryCard extends StatelessWidget {
 
     );
   }
+
   Color _getChipColor(){
-    switch(taskType){
+    switch(widget.taskType){
       case TaskType.Newtask:
         return Colors.blue;
       case TaskType.Completed:
@@ -81,8 +101,9 @@ class TaskSummeryCard extends StatelessWidget {
         return Colors.purple;
     }
   }
+
   String _getLebelName(){
-    switch(taskType){
+    switch(widget.taskType){
       case TaskType.Newtask:
         return "New";
       case TaskType.Completed:
@@ -92,6 +113,96 @@ class TaskSummeryCard extends StatelessWidget {
       case TaskType.Progress:
         return "Progress";
     }
+  }
+  void _showEditTaskStatusDialog(){
+    showDialog(context: context, builder: (cxt){
+      return AlertDialog(
+        title: Text("Edit Task Status",
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text("New"),
+              trailing: _getTaskStatusTrailing(TaskType.Newtask),
+              onTap: (){
+                if(widget.taskType == TaskType.Newtask){
+                  return;
+                }
+                _editTaskStatusTo("New");
+              },
+            ),
+            ListTile(
+              title: Text("Progress"),
+              trailing: _getTaskStatusTrailing(TaskType.Progress),
+              onTap: (){
+                if(widget.taskType == TaskType.Progress){
+                  return;
+                }
+                _editTaskStatusTo("Progress");
+              },
+            ),
+            ListTile(
+              title: Text("Completed"),
+              trailing: _getTaskStatusTrailing(TaskType.Completed),
+              onTap: (){
+                if(widget.taskType == TaskType.Completed){
+                  return;
+                }
+                _editTaskStatusTo("Completed");
+              },
+            ),
+            ListTile(
+              title: Text("Cancel"),
+              trailing: _getTaskStatusTrailing(TaskType.Cancelled),
+              onTap: (){
+                if(widget.taskType == TaskType.Cancelled){
+                  return;
+                }
+                _editTaskStatusTo("Cancelled");
+              }
+
+            ),
+          ],
+        ),
+
+
+
+
+      );
+    });
+  }
+  Widget ? _getTaskStatusTrailing(TaskType type){
+    return  widget.taskType == type ? Icon(Icons.check,color: Colors.green,) : null;
+
+  }
+  Future<void> _editTaskStatusTo(String status) async{
+    Navigator.pop(context);
+    _getEditTaskStatusInProgress=true;
+    if(mounted){
+      setState(() {});
+    }
+
+    NetworkResponse response = await NetworkCaller.getRequest(
+        url: Urls.editTaskStatusUrl(widget.taskModel.id, status),
+    );
+    if(response.isSuccess){
+      widget.onStatusChanged();
+      if(mounted){
+        showSnackBarMassage(context, "Task Status Updated to $status Successfully");
+      }
+
+    }else{
+      if(mounted){
+        showSnackBarMassage(context, response.errorMassage!);
+      }
+    }
+    _getEditTaskStatusInProgress=false;
+    if(mounted){
+      setState(() {});
+    }
+
   }
 
 }

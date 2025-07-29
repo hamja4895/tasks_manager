@@ -43,7 +43,10 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
                       itemBuilder: (context,index){
                         return TaskSummeryCard(
                           taskType: TaskType.Completed,
-                          taskModel: _completedTaskList[index],);
+                          taskModel: _completedTaskList[index],
+                          onStatusChanged: () {
+                            _getCompletedTaskList();
+                          },);
                       }
                   ),
                 ),

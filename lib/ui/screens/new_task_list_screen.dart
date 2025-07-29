@@ -86,6 +86,9 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
                       return TaskSummeryCard(
                         taskType: TaskType.Newtask,
                         taskModel: _newTaskList[index],
+                        onStatusChanged: () {
+                          _getNewTaskList();
+                        },
                       );
                       }
                   ),
