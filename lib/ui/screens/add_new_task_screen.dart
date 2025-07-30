@@ -9,6 +9,7 @@ import '../widgets/tm_appbar.dart';
 class AddNewTaskScreen extends StatefulWidget {
   const AddNewTaskScreen({super.key});
   static const String name = "/add_new_task";
+  // final VoidCallback onAddTask;
 
   @override
   State<AddNewTaskScreen> createState() => _AddNewTaskScreenState();
@@ -111,6 +112,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
     _addNewTaskProgress = false;
     setState(() {});
     if(response.isSuccess){
+
       _subjectController.clear();
       _descriptionController.clear();
       showSnackBarMassage(context, "Task Added Successfully");

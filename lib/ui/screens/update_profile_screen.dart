@@ -185,10 +185,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                             ),),
                           ),
                           SizedBox(width: 8,),
-                          Text(_selectedImage == null ? "select Image" : _selectedImage!.name,
-                            maxLines: 1,
-                            style: TextStyle(
-                              overflow: TextOverflow.fade,
+                          Expanded(
+                            child: Text(_selectedImage == null ? "select Image" : _selectedImage!.name,
+                              maxLines: 1,
+                              style: TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
 
@@ -239,12 +241,13 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         body: requestBody,
     );
     if(response.isSuccess){
-      UserModel updatedUserModel=UserModel(id: AuthController.userModel!.id,
+      UserModel updatedUserModel=UserModel(
+          id: AuthController.userModel!.id,
           email: _emailController.text.trim(),
           firstName: _firstNameController.text.trim(),
           lastName: _lastNameController.text.trim(),
           mobile: _mobileController.text.trim(),
-          photo: _selectedImage != null ? base64Encode(imageBytes!) : AuthController.userModel?.photo,
+          photo: imageBytes == null ? AuthController.userModel?.photo : base64Encode(imageBytes),
 
       );
       await AuthController.updateUserData(updatedUserModel);

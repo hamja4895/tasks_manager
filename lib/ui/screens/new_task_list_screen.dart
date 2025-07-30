@@ -88,6 +88,7 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
                         taskModel: _newTaskList[index],
                         onStatusChanged: () {
                           _getNewTaskList();
+                          _geTaskStatusCountList();
                         },
                       );
                       }
@@ -160,7 +161,10 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
   }
 
   void _onTapAddButton(){
-    Navigator.pushNamed(context, AddNewTaskScreen.name);
+    Navigator.pushNamed(context, AddNewTaskScreen.name).then((_){
+      _getNewTaskList();
+      _geTaskStatusCountList();
+    });
 
   }
 }

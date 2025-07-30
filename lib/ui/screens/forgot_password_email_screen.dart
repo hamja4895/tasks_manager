@@ -1,8 +1,12 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:tasks_manager/data/urls.dart';
 import 'package:tasks_manager/ui/screens/pin_verification_screen.dart';
+import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
+import '../../data/service/network_caller.dart';
 import '../widgets/screen_background.dart';
+import '../widgets/snack_bar_massage.dart';
 
 class ForgotPasswordEmailScreen extends StatefulWidget {
   const ForgotPasswordEmailScreen({super.key});
@@ -16,6 +20,7 @@ class ForgotPasswordEmailScreen extends StatefulWidget {
 class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   final TextEditingController _emailController=TextEditingController();
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
+  bool _getRecoveryEmailVerificationInProgress=false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,10 +72,14 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: ElevatedButton(
+                      child: Visibility(
+                        visible: _getRecoveryEmailVerificationInProgress==false,
+                        replacement: CenteredCircularIndicator(),
+                        child: ElevatedButton(
 
-                          onPressed: _onTapForgotPasswordEmailSubmitButton,
-                          child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                            onPressed: _onTapForgotPasswordEmailSubmitButton,
+                            child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                        ),
                       ),
                     ),
                     SizedBox(height: 60,),
@@ -105,14 +114,40 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   }
   void _onTapForgotPasswordEmailSubmitButton(){
     if(_formKey.currentState!.validate()){
-      //TODO email for forgot password with API
+      _getRecoveryEmailVerification(_emailController.text.trim());
     }
-    Navigator.pushNamed(context, PinVerificationScreen.name);
 
   }
 
   void _onTapSignInButton(){
     Navigator.pop(context);
+
+  }
+  Future<void> _getRecoveryEmailVerification(String email)async{
+    _getRecoveryEmailVerificationInProgress=true;
+    if(mounted){
+      setState(() {});
+    }
+    NetworkResponse response = await NetworkCaller.getRequest(
+        url: Urls.recoveryEmailVerificationUrl(email),
+    );
+    if(response.isSuccess){
+        showSnackBarMassage(context, "6-digit code sent to your email address");
+        if(mounted){
+          Navigator.pushNamed(
+              context, PinVerificationScreen.name, arguments: email);
+        }
+    }else{
+      if(mounted){
+        showSnackBarMassage(context, response.errorMassage!);
+      }
+
+
+    }
+    _getRecoveryEmailVerificationInProgress=false;
+    if(mounted){
+      setState(() {});
+    }
 
   }
   @override

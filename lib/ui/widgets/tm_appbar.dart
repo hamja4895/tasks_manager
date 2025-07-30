@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -27,7 +28,11 @@ class _TM_AppBarState extends State<TM_AppBar> {
         child: Row(
           children: [
             CircleAvatar(radius: 24,
-              backgroundImage:AuthController.userModel?.photo == null ? null : MemoryImage((AuthController.userModel?.photo ?? "") as Uint8List),
+              backgroundImage:AuthController.userModel?.photo == null
+                  ? null
+                  : MemoryImage(
+                  base64Decode(AuthController.userModel!.photo!)
+              ),
             ),
             SizedBox(width: 20),
             Expanded(
@@ -77,6 +82,5 @@ class _TM_AppBarState extends State<TM_AppBar> {
     }
 
   }
-
 
 }

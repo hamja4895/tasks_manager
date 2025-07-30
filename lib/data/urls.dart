@@ -11,6 +11,11 @@ class Urls{
   static const String getTaskStatusCountListUrl="$_baseUrl/taskStatusCount";
   static String editTaskStatusUrl(String taskId,String statusId)=>"$_baseUrl/updateTaskStatus/$taskId/$statusId";
   static const String updateProfileUrl="$_baseUrl/ProfileUpdate";
+  static String deleteTaskUrl(String taskId)=>"$_baseUrl/deleteTask/$taskId";
+  static String recoveryEmailVerificationUrl(String email)=>"$_baseUrl/RecoverVerifyEmail/$email";
+  static String verifyOTPUrl(String email,String otp)=>"$_baseUrl/RecoverVerifyOtp/$email/$otp";
+  static const String changePasswordUrl= "$_baseUrl/RecoverResetPassword";
+
 
 
 }

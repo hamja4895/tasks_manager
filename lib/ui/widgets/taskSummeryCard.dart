@@ -16,7 +16,7 @@ enum TaskType{
 class TaskSummeryCard extends StatefulWidget {
   final TaskType taskType;
   final TaskModel  taskModel;
-  final VoidCallback onStatusChanged;
+  final VoidCallback onStatusChanged;//also work for delete
 
   const TaskSummeryCard({
     super.key, required this.taskType, required this.taskModel, required this.onStatusChanged,
@@ -200,7 +200,7 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
 
           TextButton(
           onPressed: (){
-
+            _deleteTask();
           },
               child: Text("Delete",
               style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.red,fontSize: 25),
@@ -246,6 +246,24 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
   Future<void> _deleteTask() async{
     Navigator.pop(context);
     _deleteTaskInProgress=true;
+    if(mounted){
+      setState(() {});
+    }
+    NetworkResponse response = await NetworkCaller.getRequest(
+      url: Urls.deleteTaskUrl(widget.taskModel.id),
+    );
+    if(response.isSuccess){
+      // widget.onDelete();
+      widget.onStatusChanged();
+      if(mounted){
+        showSnackBarMassage(context, "Task Deleted Successfully");
+      }
+    }else{
+      if(mounted){
+        showSnackBarMassage(context, response.errorMassage!);
+      }
+    }
+    _deleteTaskInProgress=false;
     if(mounted){
       setState(() {});
     }

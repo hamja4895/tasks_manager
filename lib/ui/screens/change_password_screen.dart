@@ -1,7 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
+import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
+import '../../data/service/network_caller.dart';
+import '../../data/urls.dart';
 import '../widgets/screen_background.dart';
+import '../widgets/snack_bar_massage.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -16,6 +20,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _passwordTeController=TextEditingController();
   final TextEditingController _confirmPasswordTeController=TextEditingController();
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
+  bool _postChangePasswordInProgress=false;
+  late Map<String,dynamic> args;
+
+@override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    args=ModalRoute.of(context)!.settings.arguments as Map<String,dynamic>;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,10 +96,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: ElevatedButton(
+                      child: Visibility(
+                        visible: _postChangePasswordInProgress==false,
+                        replacement: CenteredCircularIndicator(),
+                        child: ElevatedButton(
 
-                          onPressed: _onTapChangePasswordConfirmSubmitButton,
-                          child: Text("Confirm"),
+                            onPressed: _onTapChangePasswordConfirmSubmitButton,
+                            child: Text("Confirm"),
+                        ),
                       ),
                     ),
                     SizedBox(height: 60,),
@@ -121,9 +138,44 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
   void _onTapChangePasswordConfirmSubmitButton(){
     if(_formKey.currentState!.validate()){
-      //TODO email for forgot password with API
+      _postChangePassword(args["email"],args["otp"],_passwordTeController.text);
     }
     // Navigator.pushNamed(context, PinVerificationScreen.name);
+
+  }
+  Future<void> _postChangePassword(String email,String otp,String password)async{
+    _postChangePasswordInProgress=true;
+    if(mounted){
+      setState(() {});
+    }
+    Map<String,String> requestBody={
+      "email": email,
+      "OTP": otp,
+      "password": password
+    };
+    NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.changePasswordUrl,
+        body: requestBody,
+    );
+    if(response.isSuccess){
+      showSnackBarMassage(context, "Password Changed Successfully");
+      if(mounted){
+        Navigator.pushNamedAndRemoveUntil(
+            context, SignInScreen.name, (predicate) => false);
+      }
+    }else{
+      _passwordTeController.clear();
+      _confirmPasswordTeController.clear();
+      if(mounted){
+        showSnackBarMassage(context, response.errorMassage!);
+      }
+
+    }
+    _postChangePasswordInProgress=false;
+    if(mounted){
+      setState(() {});
+    }
+
 
   }
 
