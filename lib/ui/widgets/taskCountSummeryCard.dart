@@ -11,21 +11,24 @@ class TaskCountSummeryCard extends StatelessWidget {
     return Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.zero
+            borderRadius: BorderRadius.zero,
         ),
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("$count",style: Theme.of(context).textTheme.titleLarge,),
-              Text(tittle,maxLines: 1,style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),),
-            ],
+          child: SizedBox(
+            width: 100,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text("$count",style: Theme.of(context).textTheme.titleLarge,),
+                Text(tittle,maxLines: 1,style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),),
+              ],
+            ),
           ),
         )
     );

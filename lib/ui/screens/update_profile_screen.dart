@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tasks_manager/data/models/user_model.dart';
 import 'package:tasks_manager/data/service/network_caller.dart';
 import 'package:tasks_manager/data/urls.dart';
 import 'package:tasks_manager/ui/widgets/tm_appbar.dart';
@@ -187,7 +188,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                           Text(_selectedImage == null ? "select Image" : _selectedImage!.name,
                             maxLines: 1,
                             style: TextStyle(
-                              overflow: TextOverflow.ellipsis,
+                              overflow: TextOverflow.fade,
                             ),
                           ),
 
@@ -219,6 +220,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     if(mounted){
       setState(() {});
     }
+    Uint8List ? imageBytes;
     Map<String,String> requestBody={
       "email": _emailController.text.trim(),
       "firstName": _firstNameController.text.trim(),
@@ -229,19 +231,24 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       requestBody["password"] = _passwordController.text;
     }
     if(_selectedImage != null){
-      Uint8List imageBytes = (await _selectedImage!.readAsBytes()) as Uint8List;
-      requestBody["photo"] = base64Encode(imageBytes as List<int>);
+      imageBytes = await _selectedImage!.readAsBytes();
+      requestBody["photo"] = base64Encode(imageBytes);
     }
     NetworkResponse response = await NetworkCaller.postRequest(
         url: Urls.updateProfileUrl,
         body: requestBody,
     );
     if(response.isSuccess){
+      UserModel updatedUserModel=UserModel(id: AuthController.userModel!.id,
+          email: _emailController.text.trim(),
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          mobile: _mobileController.text.trim(),
+          photo: _selectedImage != null ? base64Encode(imageBytes!) : AuthController.userModel?.photo,
+
+      );
+      await AuthController.updateUserData(updatedUserModel);
       _passwordController.clear();
-      AuthController.userModel!.email = _emailController.text.trim();
-      AuthController.userModel!.firstName = _firstNameController.text.trim();
-      AuthController.userModel!.lastName = _lastNameController.text.trim();
-      AuthController.userModel!.mobile = _mobileController.text.trim();
       if(mounted){
         showSnackBarMassage(context, "Profile Updated Successfully");
       }

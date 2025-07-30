@@ -6,6 +6,15 @@ class UserModel{
   late String mobile;
   String ? photo;
 
+  UserModel({
+    required this.id,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.mobile,
+    this.photo
+  });
+
 
   UserModel.fromJson(Map<String,dynamic> jsonData){
     id=jsonData["_id"];
