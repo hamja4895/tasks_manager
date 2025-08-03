@@ -2,8 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import '../../data/service/network_caller.dart';
-import '../../data/urls.dart';
+import '../controllers/pin_verification_controller.dart';
 import '../widgets/centered_cicular_indicator.dart';
 import '../widgets/screen_background.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
@@ -25,8 +24,8 @@ class PinVerificationScreen extends StatefulWidget {
 class _PinVerificationScreenState extends State<PinVerificationScreen> {
   final TextEditingController _otpTeController=TextEditingController();
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
-  bool _getRecoveryEmailVerificationInProgress=false;
   late String email;
+  final PinVerificationController _pinVerificationController=PinVerificationController();
 
   @override
   void didChangeDependencies() {
@@ -97,14 +96,19 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: Visibility(
-                        visible: _getRecoveryEmailVerificationInProgress==false,
-                        replacement: CenteredCircularIndicator(),
-                        child: ElevatedButton(
+                      child: GetBuilder(
+                        init: _pinVerificationController,
+                        builder: (controller) {
+                          return Visibility(
+                            visible: controller.inProgress==false,
+                            replacement: CenteredCircularIndicator(),
+                            child: ElevatedButton(
 
-                            onPressed: _onTapPinVerificationSubmitButton,
-                            child: Text("Verify")
-                        ),
+                                onPressed: _onTapPinVerificationSubmitButton,
+                                child: Text("Verify")
+                            ),
+                          );
+                        }
                       ),
                     ),
                     SizedBox(height: 60,),
@@ -144,15 +148,12 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
 
   }
   Future<void> _verifyOtp(String email,String otp)async{
-    _getRecoveryEmailVerificationInProgress=true;
-    if(mounted){
-      setState(() {});
-    }
-    NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.verifyOTPUrl(email, otp),
-    );
-    if(response.isSuccess){
-        showSnackBarMassage(context, "OTP verified.Now you can change your password");
+    final bool isSuccess=await _pinVerificationController.verifyOtp(email, otp);
+    if(isSuccess){
+      if(mounted){
+        showSnackBarMassage(
+            context, "OTP verified.Now you can change your password");
+      }
         // Navigator.pushNamed(context, ChangePasswordScreen.name,arguments:{"email":email,"otp":otp} );
         Get.toNamed(ChangePasswordScreen.name,arguments:{"email":email,"otp":otp} );
 
@@ -160,13 +161,10 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
     else{
         _otpTeController.clear();
         if(mounted){
-          showSnackBarMassage(context, response.errorMassage!);
+          showSnackBarMassage(context, _pinVerificationController.errorMessage!);
         }
     }
-    _getRecoveryEmailVerificationInProgress=false;
-    if(mounted){
-      setState(() {});
-    }
+
 
 
   }
