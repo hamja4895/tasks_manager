@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tasks_manager/data/service/network_caller.dart';
 import 'package:tasks_manager/data/urls.dart';
 import 'package:tasks_manager/ui/screens/signup_screen.dart';
@@ -157,7 +158,8 @@ class _SignInScreenState extends State<SignInScreen> {
       UserModel userModel = UserModel.fromJson(response.body!["data"]);
       String token = response.body!["token"];
       await AuthController.saveUserData(userModel, token);
-      Navigator.pushNamedAndRemoveUntil(context, MainNavbarHolder.name, (predicate)=>false);
+      // Navigator.pushNamedAndRemoveUntil(context, MainNavbarHolder.name, (predicate)=>false);
+      Get.offAllNamed(MainNavbarHolder.name);
       showSnackBarMassage(context,"Login Success");
 
     }else{
@@ -170,11 +172,13 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _onTapForgotPasswordButton(){
-    Navigator.pushNamed(context, ForgotPasswordEmailScreen.name);
+    // Navigator.pushNamed(context, ForgotPasswordEmailScreen.name);
+    Get.toNamed(ForgotPasswordEmailScreen.name);
 
   }
   void _onTapSignUpButton(){
-    Navigator.pushNamed(context, SignUpScreen.name);
+    // Navigator.pushNamed(context, SignUpScreen.name);
+    Get.toNamed(SignUpScreen.name);
 
   }
   @override

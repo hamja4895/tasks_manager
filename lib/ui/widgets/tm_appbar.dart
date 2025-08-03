@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
 import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
 
@@ -71,14 +72,16 @@ class _TM_AppBarState extends State<TM_AppBar> {
 
   Future<void> _onTapLogoutButton() async{
     await AuthController.clearUserData();
-    Navigator.pushNamedAndRemoveUntil(context,SignInScreen.name , (predicate)=>false);
+    // Navigator.pushNamedAndRemoveUntil(context,SignInScreen.name , (predicate)=>false);
+    Get.offAllNamed(SignInScreen.name);
     showSnackBarMassage(context,"Logout Success");
 
   }
   void _onTapProfile(){
 
     if(ModalRoute.of(context)!.settings.name != UpdateProfileScreen.name){
-    Navigator.pushNamed(context,UpdateProfileScreen.name);
+    // Navigator.pushNamed(context,UpdateProfileScreen.name);
+      Get.toNamed(UpdateProfileScreen.name);
     }
 
   }

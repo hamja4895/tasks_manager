@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tasks_manager/data/models/task_model.dart';
 import 'package:tasks_manager/data/service/network_caller.dart';
 import 'package:tasks_manager/data/urls.dart';
@@ -192,7 +193,8 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
         actions: [
           TextButton(
           onPressed: (){
-            Navigator.pop(context);
+            // Navigator.pop(context);
+            Get.back();
           }, child: Text("Cancel",
           style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.blue,fontSize: 25),
           ),
@@ -217,7 +219,8 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
   }
 
   Future<void> _editTaskStatusTo(String status) async{
-    Navigator.pop(context);
+    // Navigator.pop(context);
+    Get.back();
     _getEditTaskStatusInProgress=true;
     if(mounted){
       setState(() {});
@@ -244,7 +247,8 @@ class _TaskSummeryCardState extends State<TaskSummeryCard> {
 
   }
   Future<void> _deleteTask() async{
-    Navigator.pop(context);
+    // Navigator.pop(context);
+    Get.back();
     _deleteTaskInProgress=true;
     if(mounted){
       setState(() {});

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:tasks_manager/ui/controllers/auth_controller.dart';
 import 'package:tasks_manager/ui/screens/main_navbar_holder.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
@@ -30,9 +31,11 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(Duration(seconds: 2));
     bool isLogedIn = await AuthController.isUserLoggedIn();
     if(isLogedIn){
-      Navigator.pushReplacementNamed(context, MainNavbarHolder.name);
+      // Navigator.pushReplacementNamed(context, MainNavbarHolder.name);
+      Get.offNamed(MainNavbarHolder.name);
     }else{
-      Navigator.pushReplacementNamed(context, SignInScreen.name);
+      // Navigator.pushReplacementNamed(context, SignInScreen.name);
+      Get.offNamed(SignInScreen.name);
     }
 
   }

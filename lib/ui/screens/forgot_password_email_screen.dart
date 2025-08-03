@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/data/urls.dart';
+import 'package:get/get.dart';
 import 'package:tasks_manager/ui/screens/pin_verification_screen.dart';
 import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
 import '../../data/service/network_caller.dart';
@@ -120,7 +121,8 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   }
 
   void _onTapSignInButton(){
-    Navigator.pop(context);
+    // Navigator.pop(context);
+    Get.back();
 
   }
   Future<void> _getRecoveryEmailVerification(String email)async{
@@ -134,8 +136,9 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
     if(response.isSuccess){
         showSnackBarMassage(context, "6-digit code sent to your email address");
         if(mounted){
-          Navigator.pushNamed(
-              context, PinVerificationScreen.name, arguments: email);
+          // Navigator.pushNamed(
+          //     context, PinVerificationScreen.name, arguments: email);
+          Get.toNamed(PinVerificationScreen.name,arguments: email);
         }
     }else{
       if(mounted){

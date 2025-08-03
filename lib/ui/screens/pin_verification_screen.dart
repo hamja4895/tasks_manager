@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../data/service/network_caller.dart';
 import '../../data/urls.dart';
@@ -152,7 +153,8 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
     );
     if(response.isSuccess){
         showSnackBarMassage(context, "OTP verified.Now you can change your password");
-        Navigator.pushNamed(context, ChangePasswordScreen.name,arguments:{"email":email,"otp":otp} );
+        // Navigator.pushNamed(context, ChangePasswordScreen.name,arguments:{"email":email,"otp":otp} );
+        Get.toNamed(ChangePasswordScreen.name,arguments:{"email":email,"otp":otp} );
 
     }
     else{
@@ -170,7 +172,8 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
   }
 
   void _onTapSignInButton(){
-    Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
+    // Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
+    Get.offAllNamed(SignInScreen.name);
 
   }
   @override

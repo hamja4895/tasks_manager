@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:tasks_manager/data/service/network_caller.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
 import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
@@ -191,7 +192,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if(response.isSuccess){
       _clearTextFields();
-      Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
+      // Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
+      Get.offAllNamed(SignInScreen.name);
       showSnackBarMassage(context, "Registration Success.Please Login");
 
     }else{
@@ -210,7 +212,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _onTapSignInButton(){
-    Navigator.pop(context);
+    // Navigator.pop(context);
+    Get.back();
 
   }
 
