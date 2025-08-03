@@ -2,11 +2,10 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tasks_manager/data/service/network_caller.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
 import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
 import 'package:tasks_manager/ui/widgets/snack_bar_massage.dart';
-import '../../data/urls.dart';
+import '../controllers/sigin_up_controller.dart';
 import '../widgets/screen_background.dart';
 
 
@@ -26,7 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _lastNameController=TextEditingController();
   final TextEditingController _mobileController=TextEditingController();
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
-  bool _signupInProgress = false;
+  final SignUpController _signupController=SignUpController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,14 +124,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: Visibility(
-                        visible: _signupInProgress == false,
-                        replacement: CenteredCircularIndicator(),
-                        child: ElevatedButton(
+                      child: GetBuilder(
+                        init: _signupController,
+                        builder: (controller) {
+                          return Visibility(
+                            visible: controller.inProgress == false,
+                            replacement: CenteredCircularIndicator(),
+                            child: ElevatedButton(
 
-                            onPressed: _onTapSignUpButton,
-                            child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
-                        ),
+                                onPressed: _onTapSignUpButton,
+                                child: Icon(Icons.arrow_circle_right_outlined,size: 30,)
+                            ),
+                          );
+                        }
                       ),
                     ),
                     SizedBox(height: 100,),
@@ -174,30 +178,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _signUp() async{
-    _signupInProgress = true;
-    setState(() {});
-    Map<String,String> requestBody= {
-      "email": _emailController.text.trim(),
-      "firstName": _firstNameController.text.trim(),
-      "lastName": _lastNameController.text.trim(),
-      "mobile": _mobileController.text.trim(),
-      "password": _passwordController.text,
-    };
-    NetworkResponse response = await NetworkCaller.postRequest(
-        url: Urls.registrationUrl,
-        body: requestBody,
+    final bool isSuccess = await _signupController.signUp(
+      _emailController.text.trim(),
+      _firstNameController.text.trim(),
+      _lastNameController.text.trim(),
+      _mobileController.text.trim(),
+      _passwordController.text,
     );
-    _signupInProgress = false;
-    setState(() {});
 
-    if(response.isSuccess){
+    if(isSuccess){
       _clearTextFields();
       // Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
       Get.offAllNamed(SignInScreen.name);
-      showSnackBarMassage(context, "Registration Success.Please Login");
+      if(mounted){
+        showSnackBarMassage(context, "Registration Success.Please Login");
+      }
 
     }else{
-      showSnackBarMassage(context, response.errorMassage!);
+      if(mounted){
+        showSnackBarMassage(context, _signupController.errorMassage!);
+      }
 
     }
 
