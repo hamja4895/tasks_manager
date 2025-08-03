@@ -4,12 +4,14 @@ import 'package:tasks_manager/data/service/network_caller.dart';
 import '../../data/models/taskStatusCount_model.dart';
 import '../../data/models/task_model.dart';
 import '../../data/urls.dart';
+import '../controllers/new_task_task_list_controller.dart';
 import '../widgets/centered_cicular_indicator.dart';
 import '../widgets/screen_background.dart';
 import '../widgets/snack_bar_massage.dart';
 import '../widgets/taskCountSummeryCard.dart';
 import '../widgets/taskSummeryCard.dart';
 import 'add_new_task_screen.dart';
+import 'package:get/get.dart';
 
 
 class NewTaskListScreen extends StatefulWidget {
@@ -20,10 +22,10 @@ class NewTaskListScreen extends StatefulWidget {
 }
 
 class _NewTaskListScreenState extends State<NewTaskListScreen> {
-  bool _getNewTaskListInProgress=false;
   bool _getTaskStatusCountListInProgress=false;
   List<TaskModel> _newTaskList=[];
   List<TaskStatusCountModel> _taskStatusCountList=[];
+  final NewTaskListController _newTaskListController=NewTaskListController();
 
   @override
   void initState() {
@@ -78,22 +80,27 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
               Divider(thickness: 2,),
               SizedBox(height: 5),
               Expanded(
-                child: Visibility(
-                  visible: _getNewTaskListInProgress == false,
-                  replacement: CenteredCircularIndicator(),
-                  child: ListView.builder(
-                    itemCount: _newTaskList.length,
-                      itemBuilder: (context,index){
-                      return TaskSummeryCard(
-                        taskType: TaskType.Newtask,
-                        taskModel: _newTaskList[index],
-                        onStatusChanged: () {
-                          _getNewTaskList();
-                          _geTaskStatusCountList();
-                        },
-                      );
-                      }
-                  ),
+                child: GetBuilder(
+                  init: _newTaskListController,
+                  builder: (control) {
+                    return Visibility(
+                      visible: control.inProgress == false,
+                      replacement: CenteredCircularIndicator(),
+                      child: ListView.builder(
+                        itemCount: _newTaskList.length,
+                          itemBuilder: (context,index){
+                          return TaskSummeryCard(
+                            taskType: TaskType.Newtask,
+                            taskModel: _newTaskList[index],
+                            onStatusChanged: () {
+                              _getNewTaskList();
+                              _geTaskStatusCountList();
+                            },
+                          );
+                          }
+                      ),
+                    );
+                  }
                 ),
               )
             ],
@@ -113,28 +120,16 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
     );
   }
   Future<void> _getNewTaskList()async{
-    _getNewTaskListInProgress=true;
-    setState(() {});
-    NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.getNewTaskListUrl
-    );
-
-    if(response.isSuccess){
-      List<TaskModel> list=[];
-      for(Map<String,dynamic> jsonData in response.body!["data"]){
-        list.add(TaskModel.fromJson(jsonData));
-      }
-      _newTaskList=list;
+    final bool isSuccess = await _newTaskListController.getNewTaskList();
+    if(isSuccess){
+      _newTaskList=_newTaskListController.newTaskList;
 
     }else{
       if(mounted){
-        showSnackBarMassage(context, response.errorMassage!);
+        showSnackBarMassage(context, _newTaskListController.errorMassage!);
       }
     }
-    _getNewTaskListInProgress=false;
-    if(mounted){
-      setState(() {});
-    }
+
   }
   Future<void> _geTaskStatusCountList()async{
     _getTaskStatusCountListInProgress=true;
