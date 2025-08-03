@@ -2,10 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:tasks_manager/ui/screens/signin_screen.dart';
 import 'package:tasks_manager/ui/widgets/centered_cicular_indicator.dart';
-import '../../data/service/network_caller.dart';
-import '../../data/urls.dart';
+import '../controllers/change_password_controller.dart';
 import '../widgets/screen_background.dart';
 import '../widgets/snack_bar_massage.dart';
+import 'package:get/get.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -20,8 +20,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _passwordTeController=TextEditingController();
   final TextEditingController _confirmPasswordTeController=TextEditingController();
   final GlobalKey<FormState> _formKey= GlobalKey<FormState>();
-  bool _postChangePasswordInProgress=false;
   late Map<String,dynamic> args;
+  final ChangePasswordController _changePasswordController=ChangePasswordController();
 
 @override
   void didChangeDependencies() {
@@ -96,14 +96,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
                     SizedBox(
                       height: 40,
-                      child: Visibility(
-                        visible: _postChangePasswordInProgress==false,
-                        replacement: CenteredCircularIndicator(),
-                        child: ElevatedButton(
+                      child: GetBuilder(
+                        init: _changePasswordController,
+                        builder: (controller) {
+                          return Visibility(
+                            visible: controller.inProgress==false,
+                            replacement: CenteredCircularIndicator(),
+                            child: ElevatedButton(
 
-                            onPressed: _onTapChangePasswordConfirmSubmitButton,
-                            child: Text("Confirm"),
-                        ),
+                                onPressed: _onTapChangePasswordConfirmSubmitButton,
+                                child: Text("Confirm"),
+                            ),
+                          );
+                        }
                       ),
                     ),
                     SizedBox(height: 60,),
@@ -143,44 +148,33 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     // Navigator.pushNamed(context, PinVerificationScreen.name);
 
   }
+
   Future<void> _postChangePassword(String email,String otp,String password)async{
-    _postChangePasswordInProgress=true;
-    if(mounted){
-      setState(() {});
-    }
-    Map<String,String> requestBody={
-      "email": email,
-      "OTP": otp,
-      "password": password
-    };
-    NetworkResponse response = await NetworkCaller.postRequest(
-        url: Urls.changePasswordUrl,
-        body: requestBody,
-    );
-    if(response.isSuccess){
-      showSnackBarMassage(context, "Password Changed Successfully");
+    bool isSuccess = await _changePasswordController.postChangePassword(email, otp, password);
+
+    if(isSuccess){
+      // Navigator.pushNamedAndRemoveUntil(
+      //     context, SignInScreen.name, (predicate) => false);
+      Get.offAllNamed(SignInScreen.name);
       if(mounted){
-        Navigator.pushNamedAndRemoveUntil(
-            context, SignInScreen.name, (predicate) => false);
+        showSnackBarMassage(context, "Password Changed Successfully");
       }
     }else{
       _passwordTeController.clear();
       _confirmPasswordTeController.clear();
       if(mounted){
-        showSnackBarMassage(context, response.errorMassage!);
+        showSnackBarMassage(context, _changePasswordController.errorMassage!);
       }
 
     }
-    _postChangePasswordInProgress=false;
-    if(mounted){
-      setState(() {});
-    }
+
 
 
   }
 
   void _onTapSignInButton(){
-    Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
+    // Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate)=>false);
+    Get.offAllNamed(SignInScreen.name);
 
   }
   @override
