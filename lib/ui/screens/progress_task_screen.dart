@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/task_model.dart';
-import '../../data/service/network_caller.dart';
-import '../../data/urls.dart';
+import '../controllers/progress_task_controller.dart';
 import '../widgets/centered_cicular_indicator.dart';
 import '../widgets/screen_background.dart';
 import '../widgets/snack_bar_massage.dart';
 import '../widgets/taskSummeryCard.dart';
+import 'package:get/get.dart';
 
 
 
@@ -18,8 +18,8 @@ class ProgressTaskListScreen extends StatefulWidget {
 }
 
 class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
-  bool _getProgressTaskListInProgress=false;
   List<TaskModel> _progressTaskList=[];
+  final ProccessTaskController _proccessTaskController=ProccessTaskController();
 
   @override
   void initState() {
@@ -38,21 +38,26 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
           child: Column(
             children: [
               Expanded(
-                child: Visibility(
-                  visible: _getProgressTaskListInProgress == false,
-                  replacement: CenteredCircularIndicator(),
-                  child: ListView.builder(
-                      itemCount: _progressTaskList.length,
-                      itemBuilder: (context,index){
-                        return TaskSummeryCard(
-                          taskType: TaskType.Progress,
-                          taskModel: _progressTaskList[index],
-                          onStatusChanged: () {
-                            _getProgressTaskList();
-                          },
-                        );
-                      }
-                  ),
+                child: GetBuilder(
+                  init: _proccessTaskController,
+                  builder: (control) {
+                    return Visibility(
+                      visible: control.inProgress== false,
+                      replacement: CenteredCircularIndicator(),
+                      child: ListView.builder(
+                          itemCount: _progressTaskList.length,
+                          itemBuilder: (context,index){
+                            return TaskSummeryCard(
+                              taskType: TaskType.Progress,
+                              taskModel: _progressTaskList[index],
+                              onStatusChanged: () {
+                                _getProgressTaskList();
+                              },
+                            );
+                          }
+                      ),
+                    );
+                  }
                 ),
               )
             ],
@@ -63,25 +68,13 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
     );
   }
   Future<void> _getProgressTaskList()async{
-    _getProgressTaskListInProgress=true;
-    setState(() {});
-    NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.getProgressTaskListUrl
-    );
-    if(response.isSuccess) {
-      List<TaskModel> list = [];
-      for (Map<String, dynamic> jsonData in response.body!["data"]) {
-        list.add(TaskModel.fromJson(jsonData));
-      }
-      _progressTaskList = list;
+   final bool isSuccess = await _proccessTaskController.getProgressTaskList();
+    if(isSuccess) {
+      _progressTaskList = _proccessTaskController.progressTaskList;
     }else{
       if(mounted){
-        showSnackBarMassage(context, response.errorMassage!);
+        showSnackBarMassage(context, _proccessTaskController.errorMassage!);
       }
-    }
-    _getProgressTaskListInProgress=false;
-    if(mounted){
-      setState(() {});
     }
   }
 }
