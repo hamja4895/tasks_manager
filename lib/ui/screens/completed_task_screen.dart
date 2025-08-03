@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/task_model.dart';
-import '../../data/service/network_caller.dart';
-import '../../data/urls.dart';
+import '../controllers/completed_task_controller.dart';
 import '../widgets/centered_cicular_indicator.dart';
 import '../widgets/screen_background.dart';
 import '../widgets/snack_bar_massage.dart';
 import '../widgets/taskSummeryCard.dart';
+import 'package:get/get.dart';
 class CompletedTaskListScreen extends StatefulWidget {
   const CompletedTaskListScreen({super.key});
 
@@ -15,8 +15,8 @@ class CompletedTaskListScreen extends StatefulWidget {
 }
 
 class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
-  bool _getCompletedTaskListInProgress=false;
   List<TaskModel> _completedTaskList=[];
+  final CompletedTaskController _completedTaskController=CompletedTaskController();
 
   @override
   void initState() {
@@ -35,20 +35,25 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
           child: Column(
             children: [
               Expanded(
-                child: Visibility(
-                  visible: _getCompletedTaskListInProgress == false,
-                  replacement: CenteredCircularIndicator(),
-                  child: ListView.builder(
-                      itemCount: _completedTaskList.length,
-                      itemBuilder: (context,index){
-                        return TaskSummeryCard(
-                          taskType: TaskType.Completed,
-                          taskModel: _completedTaskList[index],
-                          onStatusChanged: () {
-                            _getCompletedTaskList();
-                          },);
-                      }
-                  ),
+                child: GetBuilder(
+                  init: _completedTaskController,
+                  builder: (controller) {
+                    return Visibility(
+                      visible: controller.inProgress == false,
+                      replacement: CenteredCircularIndicator(),
+                      child: ListView.builder(
+                          itemCount: _completedTaskList.length,
+                          itemBuilder: (context,index){
+                            return TaskSummeryCard(
+                              taskType: TaskType.Completed,
+                              taskModel: _completedTaskList[index],
+                              onStatusChanged: () {
+                                _getCompletedTaskList();
+                              },);
+                          }
+                      ),
+                    );
+                  }
                 ),
               )
             ],
@@ -59,26 +64,14 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
     );
   }
   Future<void> _getCompletedTaskList()async{
-    _getCompletedTaskListInProgress=true;
-    setState(() {});
-    NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.getCompletedTaskListUrl
-    );
-    if(response.isSuccess){
-      List<TaskModel> list=[];
-      for(Map<String,dynamic> jsonData in response.body!["data"]){
-        list.add(TaskModel.fromJson(jsonData));
-      }
-      _completedTaskList=list;
+    final bool isSuccess = await _completedTaskController.getCompletedTaskList();
 
+    if(isSuccess){
+      _completedTaskList=_completedTaskController.completedTaskList;
     }else{
       if(mounted){
-        showSnackBarMassage(context, response.errorMassage!);
+        showSnackBarMassage(context, _completedTaskController.errorMassage!);
       }
-    }
-    _getCompletedTaskListInProgress=false;
-    if(mounted){
-      setState(() {});
     }
   }
 }
