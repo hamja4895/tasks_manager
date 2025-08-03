@@ -65,6 +65,7 @@ class TaskManagerApp extends StatelessWidget {
         AddNewTaskScreen.name:(context)=>AddNewTaskScreen(),
         UpdateProfileScreen.name:(context)=>UpdateProfileScreen(),
       },
+      initialBinding: ,
     );
   }
 
